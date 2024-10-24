@@ -16,16 +16,11 @@ RUN apt-get update && apt-get install -y \
 ENV DISPLAY=:99
 ENV CHROME_BIN=/usr/bin/chromium
 
-# Create a startup script - Fixed the echo command
-RUN echo '#!/bin/bash' > /app/start.sh && \
-    echo 'Xvfb :99 -screen 0 1024x768x16 -ac +extension GLX +render -noreset &' >> /app/start.sh && \
-    echo 'sleep 3' >> /app/start.sh && \
-    echo 'pm2-runtime src/index.js' >> /app/start.sh && \
-    chmod +x /app/start.sh
-
 WORKDIR /app
 
 COPY package*.json ./
+COPY start.sh ./
+RUN chmod +x start.sh
 
 RUN npm update
 RUN npm install
@@ -34,5 +29,4 @@ COPY . .
 
 EXPOSE 3000
 
-# Use the startup script
-CMD ["/app/start.sh"]
+CMD ["./start.sh"]
