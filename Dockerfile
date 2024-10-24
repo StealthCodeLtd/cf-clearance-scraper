@@ -24,7 +24,6 @@ RUN chmod +x start.sh
 
 RUN npm update
 RUN npm install
-RUN npm i -g pm2
 COPY . .
 
 EXPOSE 3000

@@ -11,7 +11,7 @@ async function createBrowser() {
       headless: false,
       turnstile: true,
       connectOption: { defaultViewport: null },
-      disableXvfb: false,
+      disableXvfb: true,
     });
 
     // console.log('Browser launched');
