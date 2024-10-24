@@ -1,31 +1,21 @@
-FROM node:latest
+FROM node:20-slim
 
-# Install Xvfb and other dependencies
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
-    apt-transport-https \
-    chromium \
-    chromium-driver \
-    xvfb \
-    x11vnc \
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 ca-certificates apt-transport-https gnupg \
+      --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
-
-# Set up Xvfb
-ENV DISPLAY=:99
-ENV CHROME_BIN=/usr/bin/chromium
 
 WORKDIR /app
 
 COPY package*.json ./
-COPY start.sh ./
-RUN chmod +x start.sh
 
-RUN npm update
-RUN npm install
+RUN npm ci --omit=dev
 COPY . .
 
 EXPOSE 3000
 
-CMD ["./start.sh"]
+CMD ["node", "src/index.js"]
