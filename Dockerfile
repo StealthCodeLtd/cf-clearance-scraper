@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     xvfb \
     x11vnc \
-    xvfb-run \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up Xvfb
