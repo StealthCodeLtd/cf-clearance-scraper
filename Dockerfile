@@ -16,11 +16,11 @@ RUN apt-get update && apt-get install -y \
 ENV DISPLAY=:99
 ENV CHROME_BIN=/usr/bin/chromium
 
-# Create a startup script
-RUN echo '#!/bin/bash\n\
-Xvfb :99 -screen 0 1024x768x16 -ac +extension GLX +render -noreset &\n\
-sleep 3\n\
-pm2-runtime src/index.js' > /app/start.sh && \
+# Create a startup script - Fixed the echo command
+RUN echo '#!/bin/bash' > /app/start.sh && \
+    echo 'Xvfb :99 -screen 0 1024x768x16 -ac +extension GLX +render -noreset &' >> /app/start.sh && \
+    echo 'sleep 3' >> /app/start.sh && \
+    echo 'pm2-runtime src/index.js' >> /app/start.sh && \
     chmod +x /app/start.sh
 
 WORKDIR /app
