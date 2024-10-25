@@ -1,6 +1,7 @@
 const { connect } = require("puppeteer-real-browser");
 const fs = require("fs");
 const path = require("path");
+const appRoot = require("app-root-path");
 const args = [
   "--webrtc-ip-handling-policy=disable_non_proxied_udp",
   "--fingerprinting-canvas-image-data-noise",
@@ -69,7 +70,7 @@ const args = [
   "--disable-domain-reliability",
   // Disable the in-product Help (IPH) system.
   "--propagate-iph-for-testing",
-  "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+  "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
   "--password_manager_enabled=false",
 ];
 
@@ -79,23 +80,35 @@ async function createBrowser() {
 
     global.browser = null;
     // set userDataDir to project directory
-    const userDataDir = path.join(__dirname, "..", "..", "userProfile");
+    const userDataDir = path.join(appRoot.toString(), "userProfile");
     if (fs.existsSync(userDataDir)) {
       fs.rmSync(userDataDir, { recursive: true, force: true });
     }
     fs.mkdirSync(userDataDir);
     // console.log('Launching the browser...');
 
+    // const browser = await puppeteer.launch({
+    //   headless: true,
+    //   args,
+    //   userDataDir,
+    //   ignoreDefaultFlags: true,
+    //   defaultViewPort: null,
+    //   // executablePath: "/usr/bin/google-chrome-stable",
+    // });
+    const chromePath = findChromeExecutable(
+      path.join(appRoot.toString(), ".cache", "puppeteer", "chrome")
+    );
     const { browser } = await connect({
-      headless: "new",
-      args,
+      headless: false,
+      args: args.concat(["--headless=new"]),
       ignoreAllFlags: true,
       turnstile: true,
       connectOption: { defaultViewport: null },
       disableXvfb: true,
       customConfig: {
         userDataDir,
-        chromePath: "/usr/bin/google-chrome",
+        // chromePath: "/usr/bin/google-chrome",
+        chromePath,
       },
     });
 
@@ -134,5 +147,33 @@ async function createBrowser() {
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await createBrowser();
   }
+}
+function findChromeExecutable(startPath) {
+  const isWindows = process.platform === "win32";
+  const searchPattern = isWindows ? "chrome.exe" : "chrome";
+  let result = null;
+
+  function searchRecursively(currentPath) {
+    if (!fs.existsSync(currentPath)) {
+      return;
+    }
+
+    const files = fs.readdirSync(currentPath);
+
+    for (const file of files) {
+      const filePath = path.join(currentPath, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat.isDirectory()) {
+        searchRecursively(filePath);
+      } else if (file.toLowerCase() === searchPattern.toLowerCase()) {
+        result = filePath;
+        return;
+      }
+    }
+  }
+
+  searchRecursively(startPath);
+  return result;
 }
 createBrowser();
