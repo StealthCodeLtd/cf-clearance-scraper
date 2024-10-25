@@ -50,13 +50,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY package*.json .
-COPY .puppeteerrc.cjs .
+COPY package*.json ./
+COPY .puppeteerrc.cjs ./
 
 RUN npm ci --omit=dev
 RUN npx rebrowser-puppeteer browsers install chrome@127
 
-COPY . .
+COPY . ./
 
 EXPOSE 3000
 
