@@ -95,6 +95,7 @@ async function createBrowser() {
       disableXvfb: true,
       customConfig: {
         userDataDir,
+        chromePath: "/usr/bin/google-chrome",
       },
     });
 
